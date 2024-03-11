@@ -1,2 +1,2 @@
 # CropDoc_Backend
-Client-side code for the CropDoc app.
+Server-side code for the CropDoc app.
