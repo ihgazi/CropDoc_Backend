@@ -1,38 +1,26 @@
-const multer = require("multer");
-const path = require("path");
 const express = require("express");
 const app = express.Router();
 const { spawn } = require('child_process');
-
-// Storage engine
-const storage = multer.diskStorage({
-    destination: './upload/images',
-    filename: (req, file, cb) => {
-        cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
-    }
-});
-
-const upload = multer({
-    storage: storage,
-    limits: {
-        fileSize: 100000
-    }
-});
+const axios = require('axios');
+const fs = require('fs');
 
 /* GET Endpoint for disease prediction
  * req must have form-data containting 
  * the plant image
  */
-app.post("/upload", upload.single('crop'), (req,res) => {
-    console.log(req.file.path);
+app.post("/upload", async (req,res) => {
+    console.log('Disease called');
 
-    const inputData = JSON.stringify(req.file.path);
-    
+    const { url } = req.body;
+    const filePath = `./upload/images/${Date.now()}.jpg`;
+    const imageResponse = await axios.get(url, { responseType: 'arraybuffer' });
+    fs.writeFileSync(filePath, imageResponse.data);
+
     // Call Python script for prediction
     const pythonProcess = spawn('python', ['./routes/predict.py'], { stdio: ['pipe', 'pipe', 'pipe', 'ipc'] });
 
     // Send input data to Python script
-    pythonProcess.stdin.write(inputData);
+    pythonProcess.stdin.write(JSON.stringify(filePath));
     pythonProcess.stdin.end();
 
     // Listen for data from Python script
@@ -53,7 +41,7 @@ app.post("/upload", upload.single('crop'), (req,res) => {
             try {
                 const prediction = JSON.parse(predictionResult);
                 console.log("Prediction:", prediction.prediction); 
-                res.json({ prediction: prediction.prediction }); 
+                res.json({ prediction: prediction.prediction, accuracy: prediction.accuracy }); 
             } catch (error) {
                 console.error("Error parsing prediction result:", error);
                 res.status(500).json({ error: 'An error occurred during prediction result parsing.' });

@@ -110,7 +110,8 @@ def predict_image(img, model):
     xb = to_device(img.unsqueeze(0), device)
     yb = model(xb)
     _, preds  = torch.max(yb, dim=1)
-    return diseases[preds[0].item()]
+    confidence = torch.softmax(yb, dim=1)[0][preds[0]].item()
+    return diseases[preds[0].item()], confidence
 
 
 # Read input data 
@@ -130,8 +131,8 @@ transformed_image = transform(image)
 tensor_image = transformed_image.unsqueeze(0)
 
 img = tensor_image[0]
-predicted_disease = predict_image(img, model)
-prediction_result = {"prediction": predicted_disease}
+predicted_disease,confidence = predict_image(img, model)
+prediction_result = {"prediction": predicted_disease, "accuracy": confidence}
 
 print(json.dumps(prediction_result))
 
