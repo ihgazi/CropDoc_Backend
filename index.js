@@ -5,6 +5,7 @@ const multer = require("multer");
 // routes
 const app = express();
 const disease = require("./routes/disease");
+const recommend = require("./routes/recommend");
 
 // cors
 app.use(cors({ origin: true, credentials: true }));
@@ -15,6 +16,7 @@ app.use(express.urlencoded());
 
 // use routes
 app.use("/disease", disease);
+app.use("/recommend", recommend);
 
 const port = 8082;
 
