@@ -37,13 +37,13 @@ input_data_json = sys.stdin.read().strip()
 input_data = json.loads(input_data_json)
 
 # Extract input features
-temperature = input_data['temp']
-humidity = input_data['humidity']
-rainfall = input_data['rainfall']
-ph = input_data['ph']
-N = input_data['N']
-P = input_data['P']
-K = input_data['K']
+temperature = float(input_data['temp'])
+humidity = float(input_data['humidity'])
+rainfall = float(input_data['rainfall'])
+ph = float(input_data['ph'])
+N = float(input_data['N'])
+P = float(input_data['P'])
+K = float(input_data['K'])
 
 # Make predictions 
 prediction = model.predict([[N,P,K,temperature, humidity, ph, rainfall]])

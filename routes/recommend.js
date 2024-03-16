@@ -6,22 +6,26 @@ const { spawn } = require('child_process');
  * req must have NPK values
  */
 app.get("/", (req,res) => {
-    // Setting average values for weather
-    req.data['temp'] = 25.616243851779544;
-    req.data['humidity'] = 74.48177921778637;
-    req.data['rainfall'] = 103.46365541576817;
+    // Setting average values for weather  
+    console.log('recommend called');
+    const {N,P,K,ph,temp,humidity,rainfall} = req.body;
 
-    const inputData = JSON.stringify(req.data);
-    
     // Call Python script for prediction
     const pythonProcess = spawn('python', ['./routes/croppredict.py'], { stdio: ['pipe', 'pipe', 'pipe', 'ipc'] });
 
     // Send input data to Python script
-    pythonProcess.stdin.write(inputData);
+    pythonProcess.stdin.write(JSON.stringify({
+        N: N,
+        P: P,
+        K: K,
+        ph: ph,
+        temp: temp,
+        humidity: humidity,
+        rainfall: rainfall}));
     pythonProcess.stdin.end();
 
     // Listen for data from Python script
-    let predictionResult = '';
+    let predictionResult = "";
     pythonProcess.stdout.on('data', (data) => {
         predictionResult += data.toString();
     });
